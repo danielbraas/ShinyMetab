@@ -1,0 +1,642 @@
+
+
+# gather_data -------------------------------------------------------------
+
+gather_data <- function(Title,
+                        info = info,
+                        save_raw = TRUE,
+                        save_dropbox = TRUE,
+                        drop_vol = drop_vol){
+
+  # Gather raw MS data ----------------------------------------------------------
+  files <- list.files(pattern='.csv', recursive=T) %>%
+    .[str_detect(., '(.)*/.(.)*.csv')] # Selects only csv files in subfolders; might be suffiecient to select the right files
+
+  # Collect data
+  dat <- map(files, read_csv) %>%
+    map_df(~bind_rows(.)) %>%
+    mutate(Experiment = Title)
+
+  # Save raw data in experiment folder
+  if(save_raw){
+    write_rds(dat, 'all_data_raw.rds')
+    write_rds(info, paste(Title, 'sample_info.rds', sep = '_'))
+  }
+
+  # Save raw data to Dropbox folder
+  if(save_dropbox){
+    # Make sure folder for all raw data exists
+    if(!dir.exists(drop_vol)){
+      dir.create(drop_vol)
+    }
+    write_rds(dat, paste(drop_vol,
+                         paste(Title, 'all_data_raw.rds', sep = '_'),
+                         sep = '/'))
+
+    write_rds(info, paste(drop_vol,
+                         paste(Title, 'sample_info.rds', sep = '_'),
+                         sep = '/'))
+  }
+
+  return(dat)
+}
+
+shape_raw <- function(dat){
+
+  # Reshape and format data
+  select(dat, Compound, Filename, Area) %>%
+    spread(Filename, Area) %>%
+    mutate(Iso = if_else(str_detect(Compound, ' M[0-9]+$'),
+                         str_extract(Compound, 'M[0-9]+$'),
+                         'M0'),
+           Iso = factor(Iso, levels=paste0('M',0:50)),
+           Used_ID = str_remove(Compound, ' M[0-9]+$| Std')) %>%
+    select(Used_ID, Iso, everything()) %>%
+    arrange(Used_ID, Iso) %>%
+    inner_join(., Abbrev, by = 'Used_ID')
+
+}
+
+prepare_data <- function(data,
+                         Title,
+                         Sample.Name = '',
+                         numbers = 1,
+                         std = FALSE,
+                         bkg = FALSE,
+                         norm = 'none'){
+
+  # analyzing the metabolite standards --------------------------------------
+  # This should be expanded significantly if normalizations to standards should happen
+  if(std){
+    Std <- filter(data, grepl('Std', data$Compound)) %>%
+      select(-Iso) %>%
+      gather(Sample, Value, -Used_ID) %>%
+      filter(!(grepl('500k_cells|50[Kk]|100[Kk]|250[Kk]|X500[Kk]', Sample))) %>%
+      group_by(Used_ID) %>%
+      mutate(Av = mean(Value, na.rm=T),
+             Std = sd(Value, na.rm=T),
+             CV = Std / Av,
+             ID = paste0(gsub(' Std','',Used_ID), ' ',round(CV*100,0),'%')) %>%
+      ungroup()
+
+    pdf('Relative response of ISTDs with CV.pdf', width=14, height=10)
+    ggplot(Std, aes(Sample, log(Value,10)))+
+      geom_point(size=3)+
+      facet_wrap(~ID, scales='free')+
+      theme_bw()+
+      theme(text = element_text(face='bold',size=14),
+            axis.text.x = element_text(angle=90, vjust=.3, hjust=1))+
+      labs(x='',y='Relative response of ISTD (A.U., log10)')
+    dev.off()
+  }
+
+  # Background subtraction; needs work
+  if(bkg){
+
+    if (sum(grepl('blank|water|buffer', names(data))) > 0) {
+      blank <- data[,grep('blank|water|buffer', names(data))]
+      data <- data[,-grep('blank|water|buffer', names(data))]
+      blank[is.na(blank)] <- 0
+    }
+
+    if (sum(grepl('500k_cells|50[Kk]|100[Kk]|250[Kk]|X500[Kk]|200[Kk]', names(data))) > 0) {                          ##collect all standard samples and remove from regular samples
+      Standard <- data[,c(1:3, grep('500k_cells|50[Kk]|100[Kk]|250[Kk]|X500[Kk]|200[Kk]', names(data)))]
+      data <- data[,-grep('500k_cells|50[Kk]|100[Kk]|250[Kk]|X500[Kk]|200[Kk]', names(data))]
+    }
+
+  }
+
+  # Remove samples used for background
+  data <- select(data, -which(str_detect(names(data), 'blank|water|buffer')),
+                 -which(str_detect(names(data), 'k_cells')))
+
+  # Sample normalization to external standard
+  if(norm != 'none'){
+    Norm <- filter(data, Used_ID == norm) %>%
+      select(matches('-[0-9]+$')) %>%
+      gather(Sample, Norm) %>%
+      .$Norm
+
+    # Make normalizer plot
+    Norm.title = paste0(norm, " Response-", Title, ".pdf")
+    pdf(file = Norm.title, width=12, height=9, pointsize=12)
+    plot <- data %>%
+      filter(Used_ID == norm) %>%
+      select(matches('-[0-9]+$')) %>%
+      gather(Sample, Value) %>%
+      mutate(Sample = factor(Sample, levels = unique(Sample))) %>%
+      select(Sample, Value) %>%
+      ggplot(., aes(Sample, Value)) +
+      geom_point(size = 3) +
+      geom_line(aes(as.integer(Sample), Value), color = 'blue') +
+      theme_bw()+
+      theme(text = element_text(size = 16, face = 'bold'))+
+      labs(x = 'Sample Name',
+           y = 'Response',
+           title = paste0(norm, ' Response')) +
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+    print(plot)
+    dev.off()
+  } else {
+    Norm <- rep(1, length(numbers))
+  }
+
+  # Normalize data to normalizer and cell number
+  mat <- select(data, matches('-[0-9]+$')) %>%
+    as.matrix() %>%
+    t(.) / Norm / numbers
+  # Make data frame and replace sample columns in data
+  data <- t(mat) %>%
+    data.frame() %>%
+    bind_cols(data, .) %>%
+    select(-matches('-[0-9]+$')) %>%
+    filter(!Used_ID == norm,
+           !str_detect(Used_ID, 'Std'),
+           !str_detect(Used_ID, '[Nn]orvaline')) # remove normalizer
+
+  # reshape data for downstream analysis ------------------------------------
+  data2 <- rename(data, Name = Abb) %>%
+    select(Name, Iso, Used_ID, KEGG.ID, Nr.C, matches('.[0-9]+$')) %>%
+    gather(Exp, Value, -Name, -Iso, -Used_ID, -KEGG.ID, -Nr.C) %>%
+    mutate(Exp = plyr::mapvalues(Exp, # Label samples with sample name
+                           from = names(data)[str_detect(names(data), '.[0-9]+$')],
+                           to = Sample.Name)) %>%
+    separate(Exp, c('Condition', 'Exp'), sep='_') %>%
+    select(Name, Iso, Condition, Exp, Value, Used_ID, KEGG.ID, Nr.C) %>%
+    mutate(Condition = factor(Condition, levels = unique(Condition)),
+           Exp = paste0('Exp', Exp)) %>%
+    group_by(Name) %>%
+    mutate(NA_list = sum(is.na(Value)),
+           NA_potential = n(),
+           Name = as.character(Name)) %>%
+    ungroup() %>%
+    filter(NA_list != NA_potential) %>%
+    mutate(NA_list = NULL,
+           NA_potential = NULL,
+           Name = if_else(is.na(Name), Used_ID, Name)) # Makes sure that names that didn't match Abbrev
+
+  write.csv(data2, file = paste0(Title,"_all data normalized.csv"),
+            row.names = FALSE)
+  write_rds(data2, file = 'data2.rds')
+}
+
+# extract_analysisUI ------------------------------------------------------
+
+extract_analysisUI <- function(id){
+
+  ns <- NS(id)
+
+  tagList(
+
+    tabPanel(
+      title = 'Extract',
+      column(
+        width = 2,
+
+# Experiment setup --------------------------------------------------------
+
+        p(style = "font-weight:bold",
+          'Select experiment folder'),
+        shinyDirButton(id = ns('Dir'),
+                       label = 'Select folder',
+                       title = 'Experiment folder',
+                       icon = icon('folder-open'),
+                       style = "width:100%"),
+
+        shinyFilesButton(id = ns('info'),
+                         label = 'Choose experiment info file',
+                         title = 'Experiment info',
+                         multiple = F,
+                         icon = icon('info-circle'),
+                         style = "width:100%"),
+        actionButton(inputId = ns('show_info'),
+                     label = 'Show/hide info',
+                     icon = icon('eye'),
+                     width = '100%'),
+        checkboxInput(inputId = ns('save_info'),
+                      label = 'Save info',
+                      value = TRUE),
+        checkboxInput(inputId = ns('save_dropbox'),
+                      label = 'Save raw on Dropbox',
+                      value = TRUE),
+        checkboxInput(inputId = ns('save_raw'),
+                      label = 'Save raw data',
+                      value = TRUE),
+        checkboxInput(inputId = ns('load_raw'), # In case this step has been performed before
+                      label = 'Load gathered data',
+                      value = FALSE),
+        textInput(inputId = ns('title'),
+                  label = 'Experiment title',
+                  value = '',
+                  width = "100%"),
+        actionButton(inputId = ns('use_title'),
+                     label = 'Use',
+                     icon = icon('thumbs-up'),
+                     width = '100%'),
+        hr(),
+
+# Prepare MS data ------------------------------------------------------------
+
+        p(style = "font-weight:bold",
+          'Load MS data'),
+        checkboxInput(inputId = ns('create_Std'),
+                      label = 'Produce Standards plots',
+                      value = TRUE),
+        selectInput(inputId = ns('normalizer'),
+                    label = 'Select normalizer',
+                    choices = 'none'),
+        actionButton(inputId = ns('prep_data'),
+                     label = 'Prepare MS data',
+                     icon = icon('flask'),
+                     width = '100%'),
+        hr(),
+
+# Process data ------------------------------------------------------------
+
+        p(style = "font-weight:bold",
+          'Process metabolomics data'),
+        actionButton(inputId = ns('make_RelAmounts'),
+                     label = 'Calculate relative amounts',
+                     icon = icon('balance-scale-left'),
+                     width = '100%'),
+        actionButton(inputId = ns('make_MID'),
+                     label = 'Calculate Mass Isotopologue Distribution',
+                     icon = icon('code-branch'),
+                     width = '100%'),
+        actionButton(inputId = ns('make_FC'),
+                     label = 'Calculate Fractional Contribution',
+                     icon = icon('gulp'),
+                     width = '100%'),
+        actionButton(inputId = ns('make_PercentLabeled'),
+                     label = 'Calculate percent labeled',
+                     icon = icon('glass-whiskey'),
+                     width = '100%'),
+        hr(),
+
+# Graphical output --------------------------------------------------------
+
+        p(style = "font-weight:bold",
+          'Graphical output'),
+        actionButton(inputId = ns('make_Plots'),
+                     label = 'Bar graphs',
+                     icon = icon('chart-bar'),
+                     width = '100%'),
+        actionButton(inputId = ns('make_volcano'),
+                     label = 'Volcano plot',
+                     icon = icon('brain'),
+                     width = '100%'),
+        actionButton(inputId = ns('make_Heatmap'),
+                     label = 'Heatmap',
+                     icon = icon('braille'),
+                     width = '100%'),
+        actionButton(inputId = ns('make_PCA'),
+                     label = 'PCA',
+                     icon = icon('hubspot'),
+                     width = '100%')
+      ),
+
+
+# Console -----------------------------------------------------------------
+
+      column(
+        width = 10,
+        h5('Experiment folder:'),
+        verbatimTextOutput(ns('DIR')),
+        h5('Experiment title:'),
+        verbatimTextOutput(ns('TITLE')),
+        DTOutput(ns('info')),
+        hr(),
+        h5('Raw data files in experiment folder:'),
+        verbatimTextOutput(ns('raw_files')),
+        plotOutput(ns('NORM')),
+        verbatimTextOutput(ns('preprocessed')),
+        hr(),
+        verbatimTextOutput(ns('dat.RelA')),
+        verbatimTextOutput(ns('DAT.MID')),
+        verbatimTextOutput(ns('dat.FC')),
+        verbatimTextOutput(ns('dat.lab')),
+      )
+
+    )
+  )
+}
+
+# extract_analysis server -------------------------------------------------
+
+extract_analysis <- function(input, output, session,
+                             volumes = volumes){
+
+# Experiment setup --------------------------------------------------------
+
+  # Navigate to project folder
+  shinyDirChoose(input = input,
+                 id = 'Dir',
+                 roots = volumes,
+                 defaultRoot = 'R_Projects')
+
+  # Select and change into directory
+  observe({
+    req(input$Dir)
+    dir <- parseDirPath(roots = volumes, input$Dir)
+    if(length(dir > 0)) setwd(dir)
+    output$DIR <- renderText(dir)
+  })
+
+  # Pick sample information file
+  shinyFileChoose(input = input,
+                  id = 'info',
+                  filetypes = c('csv', 'xls', 'xlsx', 'rds'),
+                  roots = c('Exp' = '.')) # Have to find a way to pass folder name (or just top level?) into quotes
+
+  # Load sample info and prepare Sample.Name column
+  info_dat <- reactive({
+    req(input$Dir)
+    if (!is.integer(input$info[1])){
+      name <- parseFilePaths(volumes, input$info)$name
+
+      if(grepl('csv|CSV', name)){
+        info <- read_csv(parseFilePaths(volumes, input$info)$name,
+                         col_names = input$heading,
+                         na = input$na.string)
+      }
+
+      if(str_detect(name, 'xls|XLS')){
+        info <- readxl::read_excel(parseFilePaths(volumes, input$info)$name)
+      }
+
+      if(str_detect(name, 'rds')){
+        info <- read_rds(parseFilePaths(volumes, input$info)$name)
+      }
+
+      # Process info data table
+      info <- mutate(info, Condition = str_replace_all(Condition, '^\\s+|\\s+$', ''),  # remove leading or trailing white space
+                     Condition = str_replace_all(Condition, '/|_', '-'),
+                     Condition = factor(Condition, levels = unique(Condition))) %>%
+        group_by(Condition) %>%
+        mutate(Sample.Name = str_c(Condition, row_number(), sep = '_')) %>%
+        ungroup()
+      return(info)
+    }
+  })
+
+  # Display sample info in console
+  output$info <- renderDT({
+    req(input$info)
+
+    # Decide if to show info or not
+    if(input$show_info %% 2 == 0){
+      datatable(info_dat(),
+                editable = 'cell')
+    }
+  })
+
+  # Experiment title
+  observe({
+    req(input$Dir, input$info)
+
+    val <- parseFilePaths(volumes, input$info)$name %>%
+      str_remove(., '.xls(x)?') %>% # Remove extensions
+      str_remove(., '.rds')
+
+    updateTextInput(session = session,
+                    inputId = 'title',
+                    label = 'Title',
+                    value = val)
+  })
+
+  # Print title
+  output$TITLE <- renderText(input$title)
+
+# Load MS data ------------------------------------------------------------
+  # Does raw data file exist and update selection if it does
+  observe({
+    req(input$Dir)
+    if(file.exists('all_data_raw.csv') | file.exists('all_data_raw.rds')){
+      updateCheckboxInput(session = session,
+                          inputId = 'load_raw',
+                          value = TRUE)
+    }
+
+  })
+
+  # Show raw data files if available
+  output$raw_files <- renderPrint({
+    req(input$Dir)
+    list.files(pattern='.csv', recursive=T) %>%
+      .[str_detect(., '(.)*/.(.)*.csv')] # Selects only csv files in subfolders; might be suffiecient to select the right files
+  })
+
+  # Gather data
+  data <- eventReactive(input$use_title, {
+    req(input$Dir, input$title, info_dat())
+
+    if(input$load_raw){
+      if(file.exists('all_data_raw.rds')){
+        read_rds('all_data_raw.rds') %>%
+          shape_raw()
+      } else {
+        suppressWarnings(read_csv('all_data_raw.csv')) %>%
+          shape_raw()
+      }
+    } else {
+      print(volumes$Raw_data$Extracts)
+      gather_data(Title = input$title,
+                  info = info_dat(),
+                  save_raw = input$save_raw,
+                  save_dropbox = input$save_dropbox,
+                  drop_vol = volumes$Raw_data$Extracts) %>%
+        shape_raw()
+    }
+
+  })
+
+# Prepare data for analysis -----------------------------------------------
+
+
+  # Choose normalizer
+  observe({
+    req(data())
+
+    # Find external normalizer
+    std <- c(data()$Compound[str_detect(data()$Compound, '[Nn]orv')],
+             data()$Compound[str_detect(data()$Compound, '[Ss]td')],
+             'none') %>%
+      unique()
+
+    updateSelectInput(session = session,
+                      inputId = 'normalizer',
+                      choices = std)
+  })
+
+  # Make a line plot of the response of the normalizer
+  output$NORM <- renderPlot({
+    req(data(), input$normalizer)
+
+    data() %>%
+      filter(Used_ID == input$normalizer) %>%
+      select(matches('-[0-9]+$')) %>%
+      gather(Sample, Value) %>%
+      mutate(Sample=factor(Sample, levels=unique(Sample))) %>%
+      select(Sample, Value) %>%
+      ggplot(., aes(Sample, Value)) +
+      geom_point(size=3) +
+      geom_line(aes(as.integer(Sample), Value), color='blue') +
+      theme_bw()+
+      theme(text = element_text(size = 16, face = 'bold'))+
+      labs(x='Sample Name', y='Response', title=paste0(input$normalizer, ' Response')) +
+      theme(axis.text.x=element_text(angle=90, vjust=0.5, hjust=1))
+  })
+
+
+  data2 <- eventReactive(input$prep_data, {
+    req(data(), input$normalizer)
+
+    prepare_data(data = data(),
+                 Title = input$title,
+                 Sample.Name = info_dat()$Sample.Name,
+                 numbers = info_dat()$Cell.Number,
+                 std = FALSE,
+                 bkg = FALSE,
+                 norm = input$normalizer)
+  })
+
+  output$preprocessed <- renderPrint(
+    paste0('Data pre-processed: ',
+           dim(data2())[1], ' observations and ',
+           dim(data2())[2], ' variables.')
+    )
+
+# Process data ------------------------------------------------------------
+
+  dat.RelA <- eventReactive(input$make_RelAmounts,{
+    req(info_dat(), data2(), input$title)
+    make_RelAmounts(data2(), Title = input$title)
+  })
+
+  output$dat.RelA <- renderPrint({ # Insert spinner logic
+    paste0('Relative Amounts processed: ',
+           dim(dat.RelA())[1], ' observations and ',
+           dim(dat.RelA())[2], ' variables.')
+    })
+
+  dat.MID <- eventReactive(input$make_MID,{
+    req(info_dat(), data2(), input$title)
+    make_MID(data2(), Title = input$title)
+  })
+
+  observe({
+
+    print(dim(dat.MID()))
+    print(dim(dat.FC()))
+    print(dim(dat.lab()))
+  })
+
+  output$DAT.MID <- renderPrint({ # Insert spinner logic
+    paste0('Mass Isotopologue Distributions processed: ',
+           dim(dat.MID())[1], ' observations and ',
+           dim(dat.MID())[2], ' variables.')
+  })
+
+  dat.FC <- eventReactive(input$make_FC,{
+    req(info_dat(), dat.MID(), input$title)
+    # Should add feedback if dat.MID doesn't exist
+    make_FC(dat.MID(), Title = input$title)
+  })
+
+  output$dat.FC <- renderPrint({ # Insert spinner logic
+    paste0('Fractional contributions processed: ',
+           dim(dat.FC())[1], ' observations and ',
+           dim(dat.FC())[2], ' variables.')
+  })
+
+  dat.lab <- eventReactive(input$make_PercentLabeled,{
+    req(info_dat(), dat.MID(), input$title)
+    make_labeled(dat.MID(), Title = input$title)
+  })
+
+  output$dat.lab <- renderPrint({ # Insert spinner logic
+    paste0('Percent labeled processed: ',
+           dim(dat.lab())[1], ' observations and ',
+           dim(dat.lab())[2], ' variables.')
+  })
+
+  # RelA <- make_matrix(data4)
+  # MID <- make_matrix(data3)
+  # FC_mat <- make_matrix((FC))
+  #
+  # make_pheatmap(RelA, samples)
+  # make_pheatmap(MID, samples)
+  # make_pheatmap(FC_mat, samples)
+  #
+  # make_PCA2(RelA)
+  # make_PCA2(MID)
+  # make_PCA2(FC_mat)
+  #
+  # ##making graphs
+  # plotname=paste(Title,"-plots.pdf", sep='')
+  # pdf(file = plotname, width=14, height=10, pointsize=12)
+  # bar('glycolysis',data4)
+  # bar('glycolysis',data3)
+  # bar('glycolysis',data_labeled)
+  # bar('glycolysis',FC)
+  # bar("TCA",data4)
+  # bar("TCA",data3)
+  # bar("TCA",data_labeled)
+  # bar("TCA",FC)
+  # bar("PPP",data4)
+  # bar("PPP",data3)
+  # bar("PPP",data_labeled)
+  # bar("PPP",FC)
+  # bar("Curr",data4)
+  # bar("Curr",data3)
+  # bar("Curr",data_labeled)
+  # bar("Curr",FC)
+  # bar("Cys",data4)
+  # bar("Cys",data3)
+  # bar("Cys",data_labeled)
+  # bar("Cys",FC)
+  # bar("AA",data4)
+  # bar("AA",data3)
+  # bar("AA",data_labeled)
+  # bar("AA",FC)
+  # bar("FA",data4)
+  # bar("FA",data3)
+  # bar("FA",data_labeled)
+  # bar("FA",FC)
+  # bar("Hex",data4)
+  # bar("Hex",data3)
+  # bar("Hex",data_labeled)
+  # bar("Hex",FC)
+  # bar("Adenine",data4)
+  # bar("Adenine",data3)
+  # bar("Adenine",data_labeled)
+  # bar("Adenine",FC)
+  # bar("Cytosine",data4)
+  # bar("Cytosine",data3)
+  # bar("Cytosine",data_labeled)
+  # bar("Cytosine",FC)
+  # bar("Guanine",data4)
+  # bar("Guanine",data3)
+  # bar("Guanine",data_labeled)
+  # bar("Guanine",FC)
+  # bar("Thymine",data4)
+  # bar("Thymine",data3)
+  # bar("Thymine",data_labeled)
+  # bar("Thymine",FC)
+  # bar("Uracil",data4)
+  # bar("Uracil",data3)
+  # bar("Uracil",data_labeled)
+  # bar("Uracil",FC)
+  # bar('Fru',data4)
+  # bar('Fru',data3)
+  # bar("Fru",data_labeled)
+  # bar('Fru',FC)
+  # bar('CoAs',data4)
+  # bar('CoAs',data3)
+  # bar("CoAs",data_labeled)
+  # bar('CoAs',FC)
+  # dev.off()
+  #
+  # save.image(paste(Title, '.rdata', sep=''))
+
+}

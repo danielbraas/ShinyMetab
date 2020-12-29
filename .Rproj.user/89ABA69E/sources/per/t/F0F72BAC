@@ -1,0 +1,24 @@
+{
+    "id": "F0F72BAC",
+    "path": "~/Dropbox/R_projects/ShinyMetab/R/make_data.R",
+    "project_path": "R/make_data.R",
+    "type": "r_source",
+    "hash": "842324307",
+    "contents": "",
+    "dirty": false,
+    "created": 1606983304267.0,
+    "source_on_save": false,
+    "relative_order": 3,
+    "properties": {
+        "cursorPosition": "332,55",
+        "scrollLine": "332"
+    },
+    "folds": "9|62|83|0|\n355|54|410|0|\n421|59|469|0|\n481|53|523|0|\n536|75|583|0|\n",
+    "lastKnownWriteTime": 1606986168,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1606986168590,
+    "read_only": false,
+    "read_only_alternatives": []
+}

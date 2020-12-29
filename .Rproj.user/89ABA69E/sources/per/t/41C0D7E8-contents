@@ -1,0 +1,33 @@
+library(tidyverse)
+#library(MetabFUN)
+library(ShinyMetab)
+library(shiny)
+library(shinyFiles)
+library(shinycssloaders)
+library(DT)
+
+conf <- jsonlite::fromJSON(read_lines('~/config.json'))
+#source(paste0(conf$Shiny$ShinyMetab, '/R/module.R'))
+
+ui <- navbarPage(
+  title = 'Modules',
+  theme = shinythemes::shinytheme('cerulean'),
+
+  tabPanel(
+    title = 'Extract',
+    extract_analysisUI(id = 'exp')
+  )
+)
+
+server <- function(input, output, session){
+
+  volumes <- jsonlite::fromJSON(read_lines('~/config.json'))
+
+  callModule(
+    module = extract_analysis,
+    id = 'exp',
+    volumes = volumes$Shiny
+  )
+}
+
+shinyApp(ui, server)

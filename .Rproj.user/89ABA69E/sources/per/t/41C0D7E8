@@ -1,0 +1,24 @@
+{
+    "id": "41C0D7E8",
+    "path": "~/Dropbox/R_projects/ShinyMetab/module_tester.R",
+    "project_path": "module_tester.R",
+    "type": "r_source",
+    "hash": "1205232952",
+    "contents": "",
+    "dirty": false,
+    "created": 1605264588243.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "cursorPosition": "4,12",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1606411046,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1606411046,
+    "read_only": false,
+    "read_only_alternatives": []
+}

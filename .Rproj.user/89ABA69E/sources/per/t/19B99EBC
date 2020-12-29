@@ -1,0 +1,24 @@
+{
+    "id": "19B99EBC",
+    "path": "~/Dropbox/R_projects/ShinyMetab/R/module.R",
+    "project_path": "R/module.R",
+    "type": "r_source",
+    "hash": "452873994",
+    "contents": "",
+    "dirty": false,
+    "created": 1605264584834.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "cursorPosition": "538,0",
+        "scrollLine": "519"
+    },
+    "folds": "2|14|181|0|\n195|19|236|0|\n237|18|252|0|\n275|19|297|0|\n328|19|408|0|\n409|15|451|0|\n452|28|507|0|\n",
+    "lastKnownWriteTime": 1606985760,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1606985760573,
+    "read_only": false,
+    "read_only_alternatives": []
+}

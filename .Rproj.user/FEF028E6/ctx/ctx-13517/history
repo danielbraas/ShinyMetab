@@ -1,0 +1,512 @@
+str_detect(list.files(), '_Heatmap_')
+sum(str_detect(list.files(), '_Heatmap_'))
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab/module_tester.R')
+source('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab/R/module.R')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab/module_tester.R')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab/module_tester.R')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab/module_tester.R')
+sum(str_detect(list.files(), '_PC[1-5] vs. PC[1-5]_'))
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab/module_tester.R')
+shiny::runApp()
+shiny::runApp()
+setwd("C:/Users/Daniel/Dropbox/R_projects/test")
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+?observeEvent
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+rm(list=ls())
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+rm(list=ls())
+load('TL-04112016.rdata')
+rm(list=ls())
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+rm(list=ls())
+laod('TL-04112016.rdata')
+load('TL-04112016.rdata')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+rm(list=ls())
+load('TL-04112016.rdata')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+rm(dat2)
+rm(list=ls())
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+load('TL-04112016.rdata')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab')
+rm(list=ls())
+library(shiny); runApp('module_tester.R')
+runApp('module_tester.R')
+runApp('module_tester.R')
+setwd("C:/Users/Daniel/Dropbox/R_projects/medium_test")
+list.files()
+test <- read_csv("Klara-Media-Goldstein Lab-AG-08202017all data raw-_2017-08-19 02-34-52.csv")
+View(test)
+rm(test)
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab/module_tester.R')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab/module_tester.R')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab/module_tester.R')
+list.files()
+test <- read_csv("Klara-Media-Goldstein Lab-AG-08202017_sample info.csv")
+View(test)
+test$Sample.Name <- NULL
+write.csv(test, 'AG-08202017.csv')
+library(shiny); runApp('module_tester.R')
+runApp('module_tester.R')
+runApp('module_tester.R')
+?read_csv
+runApp('module_tester.R')
+setwd("C:/Users/Daniel/Dropbox/R_projects/medium_test")
+test <- read_csv('AG-08202017.csv')
+test$X1 <- NULL
+head(test)
+write_csv(test, 'AG-08202017.csv')
+runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab/module_tester.R')
+library(shiny); runApp('module_tester.R')
+install.packages(c("alphashape3d", "backports", "cli", "clue", "colorspace", "colourvalues", "data.table", "Deriv", "emmeans", "epiR", "fda", "future", "geometries", "ggraph", "gh", "globals", "gplots", "here", "Hmisc", "htmlwidgets", "hunspell", "inline", "insight", "isoband", "ISOcodes", "jsonlite", "lme4", "loo", "lubridate", "magick", "magrittr", "maxLik", "mboost", "mclust", "mice", "multcomp", "nimble", "OAIHarvester", "partykit", "pillar", "piton", "processx", "ps", "psychotools", "quanteda.textmodels", "quantmod", "raster", "rbibutils", "RcppArmadillo", "recipes", "rgl", "rlang", "Rmpfr", "rprojroot", "RSSL", "rstudioapi", "sfheaders", "slam", "sparklyr", "spatstat.data", "stopwords", "svs", "tensorA", "textshaping", "tidymodels", "tidyxl", "tm", "tufte", "tune", "usethis", "vctrs", "vegan"))
+install.packages("nlme", lib="C:/R/library")
+setwd("C:/Users/Daniel/Dropbox/R_projects/medium_test")
+library(tidyverse)
+info <- read_rds('AG-08202017_sample_info.rds')
+amounts <- read_rds('AG-08202017_all_Amounts.rds')
+amounts2 <- amounts %>%
+select(Name, KEGG.ID, Condition, contains('Exp')) %>%
+gather(Exp, Amount, -Name, -KEGG.ID, -Condition) %>%
+arrange(Name, Condition) %>%
+unite(Condition_Exp, c(Condition,Exp), sep='_') %>%
+mutate(Condition_Exp=factor(Condition_Exp, levels=unique(Condition_Exp))) %>%
+#  mutate(Condition_Exp = Condition:Exp, Condition=NULL, Exp=NULL) %>%
+spread(Condition_Exp, Amount) %>%
+ungroup()
+View(amounts2)
+head(amounts)
+fresh <- info[grep('unspent|[Bb]lank|[Ff]resh|[Cc]ontrol|[Mm]edium|[Mm]edia', info$Condition),]$Sample  #find blank medium samples
+info$Sample
+View(info)
+grep('unspent|[Bb]lank|[Ff]resh|[Cc]ontrol|[Mm]edium|[Mm]edia', info$Condition)
+library(shiny); runApp('C:/Users/Daniel/Dropbox/R_projects/ShinyMetab/module_tester.R')
+info <- read_rds('AG-08202017_sample_info.rds')
+fresh <- info[grep('unspent|[Bb]lank|[Ff]resh|[Cc]ontrol|[Mm]edium|[Mm]edia', info$Condition),]$Sample  #find blank medium samples
+info
+fresh
+setwd("C:/Users/Daniel/Dropbox/R_projects/medium_test")
+library(tidyverse)
+info <- read_rds('AG-08202017_sample_info.rds')
+amounts <- read_rds('AG-08202017_all_Amounts.rds')
+list.files()
+Title = 'AG-08202017'
+amounts2 <- amounts %>%
+select(Name, KEGG.ID, Condition, contains('Exp')) %>%
+gather(Exp, Amount, -Name, -KEGG.ID, -Condition) %>%
+arrange(Name, Condition) %>%
+unite(Condition_Exp, c(Condition,Exp), sep='_') %>%
+mutate(Condition_Exp = factor(Condition_Exp, levels = unique(Condition_Exp))) %>%
+spread(Condition_Exp, Amount)
+fresh <- info[grep('unspent|[Bb]lank|[Ff]resh|[Cc]ontrol|[Mm]edium|[Mm]edia', info$Condition),]$Sample  #find blank medium samples
+if (length(which(sapply(amounts2[,3:length(amounts2)], sum, na.rm=T)==0)) > 0){
+amounts2 <- amounts2[-(which(sapply(amounts2[,3:length(amounts2)], sum, na.rm=T)==0)+2)]   #remove columns with only NAs
+}
+for (i in seq_len(length(unique(info$Medium)))) {  #create variable with average amount in blank medium
+assign(LETTERS[i],
+apply(amounts2[,fresh[c(i*3-2, i*3-1, i*3)]+2], 1, mean, na.rm=T))
+}
+#change NAs in 'fresh' variables to 0
+samples <- info[-grep('unspent|[Bb]lank|[Ff]resh|[Cc]ontrol|[Mm]edium|[Mm]edia', info$Condition),]
+amounts3 <- amounts2
+for (i in seq_len(length(unique(samples$Medium)))){
+spent <- samples[grep(LETTERS[i], samples$Medium),]$Sample + 2
+amounts3[,spent] <- amounts3[,spent]-get(LETTERS[i])
+}
+amounts3 <- amounts3[,-(fresh+2)]
+amounts3[is.na(amounts3)] <- 0
+condition = as.character(samples$Sample.Name)
+numbers=samples$Cell.Number
+for (i in 1: length(numbers)){
+for (j in 1: nrow(amounts3)) amounts3[j,i+2]=amounts3[j,i+2]/numbers[i]
+}
+#making a heatmap
+amounts3 <- amounts3[,!(colSums(amounts3[3:length(amounts3)], na.rm=T)==0)]
+amounts3 <- amounts3[!(rowSums(amounts3[3:length(amounts3)], na.rm=T)==0),]
+data5=as.matrix(amounts3[3:length(amounts3)])
+rownames(data5)=amounts3[,1]
+colnames(data5)=names(amounts3[3:length(amounts3)])
+ann=data.frame("Condition"=as.character(samples$Condition),'Cell Number'=numbers)
+Sig.color=c("blue", "red")
+names(Sig.color)=unique(samples$Type.1)
+Norv.color = c("white", "blue")
+Cell.Number.color= c("white", "green")
+names(colors)=unique(samples$Condition)
+ann_colors = list(Condition=colors[1:length(unique(samples$Condition))], Norvaline = Norv.color, Cell.Number = Cell.Number.color)
+fresh
+View(amounts3)
+sapply(amounts2[,3:length(amounts2)], sum, na.rm=T)==0)
+sapply(amounts2[,3:length(amounts2)], sum, na.rm=T)==0
+sapply(amounts2[,3:length(amounts2)], sum, na.rm=T)
+colSums(amounts2)
+?mutate
+?across
+sapply(amounts2, class)
+mutate(amounts2, across(where(is.numeric), ~colSums))
+mutate(amounts2, across(where(is.numeric), ~colSums(.)))
+mutate(amounts2, across(where(is.numeric), ~colSums(.x)))
+mutate(amounts2, across(where(is.numeric) ~colSums(.x)))
+mutate_if(amounts2, is.numeric, colSums())
+mutate_if(amounts2, is.numeric, colSums(.x))
+?mutate_if
+mutate_if(amounts2, is.numeric, colSums)
+sapply(amounts2, class)
+mutate(amounts2, across(where(is.numeric) ~colSums))
+mutate(amounts2, across(is.numeric), ~colSums))
+mutate(amounts2, across(is.numeric), ~colSums)
+?where
+mutate(amounts2, across(where(is.numeric), colSums))
+mutate(amounts2, across(where(is.numeric), as.character))
+mutate(amounts2, across(where(is.numeric), sum, na.rm=T))
+sapply(amounts2, colSums)
+A
+head(amounts2)
+View(info)
+head(amounts)
+amounts %>%
+select(Name, KEGG.ID, Condition, contains('Exp')) %>%
+gather(Exp, Amount, -Name, -KEGG.ID, -Condition) %>%
+arrange(Name, Condition) %>%
+unite(Condition_Exp, c(Condition,Exp), sep='_')
+amounts %>%
+select(Name, KEGG.ID, Condition, contains('Exp')) %>%
+gather(Exp, Amount, -Name, -KEGG.ID, -Condition)
+head(amounts2)
+head(amounts3)
+B
+i=1
+c(i*3-2, i*3-1, i*3)
+seq_len(length(unique(info$Medium)))
+amounts %>%
+select(Name, KEGG.ID, Condition, contains('Exp')) %>%
+gather(Exp, Amount, -Name, -KEGG.ID, -Condition)
+head(amounts2)
+head(amounts)
+amounts3[,3:length(amounts3)][amounts3[,3:length(amounts3)]==0] <- NA
+amounts3 <- amounts3 %>%
+gather(Condition_Exp, Amount, -Name, -KEGG.ID) %>%
+separate(Condition_Exp, c('Condition', 'Exp'), sep='_') %>%
+mutate(Condition=factor(Condition, levels=unique(.$Condition))) %>%
+group_by(Name, Condition) %>%
+mutate(Av=mean(Amount),
+Std=sd(Amount),
+CV=Std/Av) %>%
+ungroup()
+amounts3$Amount <- mapvalues(amounts3$Amount, NA, 0)
+amounts3$Amount <- plyr::mapvalues(amounts3$Amount, NA, 0)
+data8=split(amounts3, amounts3[,1])
+ANOVA=suppressWarnings(sapply(data8, function(x) anova(aov(x$Amount~x$Condition))$Pr[1]))
+ANOVA=rep(ANOVA,1,each=length(unique(amounts3$Condition)))
+amounts3 <- amounts3 %>%
+spread(Exp, Amount) %>%
+arrange(Name) %>%
+mutate(ANOVA = ANOVA,
+Sig = '')
+for (i in 1:nrow(amounts3)){
+if (amounts3$ANOVA[i] == "NaN") amounts3$Sig[i]=""
+else if (amounts3$ANOVA[i] <= 0.001) amounts3$Sig[i]="***"
+else if (amounts3$ANOVA[i] <= 0.01) amounts3$Sig[i]="**"
+else if (amounts3$ANOVA[i] <= 0.05) amounts3$Sig[i]="*"
+else amounts3$Sig[i]=""
+}
+head(amounts3)
+setwd("C:/Users/Daniel/Dropbox/R_projects/extract_test")
+setwd("C:/Users/Daniel/Dropbox/R_projects/medium_test")
+make_matrix <- function(MS_data, Title = '', Type, anova = 0.05, folder = getwd()){
+# Find out what kind of input matrix is, ie relative amounts, MIDs etc
+type <- names(MS_data)[str_detect(names(MS_data), 'Exp|MID|FC|Labeled')] %>%
+str_remove('( )?[0-9]+$') %>%
+unique()
+switch(type,
+Exp = ext <- 'Relative Amounts',
+MID = ext <- 'MIDs',
+FC = ext <- 'Fractional Contribution',
+Labeled = ext <- 'Percent Labeled'
+)
+if(!grepl('/$', folder)) folder <- paste0(folder, '/')
+if (sum(grepl('MID', names(MS_data))) >= 1) {
+data9 <- MS_data %>%
+filter(ANOVA <= anova) %>%
+select(Name, Condition, Iso, contains('MID')) %>%
+gather(Exp, Value,-Name,-Condition,-Iso) %>%
+arrange(Name, Condition) %>%
+unite(Condition_Exp, c(Condition, Exp), sep = '_') %>%
+mutate(Condition_Exp = factor(Condition_Exp, levels = unique(Condition_Exp))) %>%
+unite(Name_Iso, c(Name, Iso), sep = '_') %>%
+spread(Condition_Exp, Value)
+data9 <- data9[!(rowSums(data9[2:length(data9)], na.rm = T) == 0), ]
+} else {
+data9 <- MS_data %>%
+filter(ANOVA <= anova) %>%
+select(Name, Condition, grep('Exp|FC|Labeled', names(MS_data))) %>%
+gather(Exp, Value,-Name,-Condition) %>%
+arrange(Name, Condition) %>%
+group_by(Name) %>%
+mutate(Nr.NA = sum(is.na(Value)),
+Nr.Samples = n()) %>%
+filter(Nr.NA < Nr.Samples - 1) %>%
+ungroup() %>%
+select(-Nr.NA,-Nr.Samples) %>%
+unite(Condition_Exp, c(Condition, Exp), sep = '_') %>%
+mutate(Condition_Exp = factor(Condition_Exp, levels = unique(Condition_Exp))) %>%
+spread(Condition_Exp, Value)
+}
+data9[is.na(data9)] <- 0
+data5 = as.matrix(data9[2:length(data9)])
+rownames(data5) <- data9$Name
+data5 <- data5[!(rowSums(data5)) == 0, ]
+data5 <- data5[, !(colSums(data5)) == 0]
+# Save matrix data
+write.csv(data5, file = paste0(Title, '_Heatmap_', ext, '.csv'))
+return(data5)
+}
+test <- make_matrix(amounts3)
+anova = 0.05
+MS_data <- amounts3
+data9 <- MS_data %>%
+filter(ANOVA <= anova) %>%
+select(Name, Condition, Iso, contains('MID')) %>%
+gather(Exp, Value,-Name,-Condition,-Iso) %>%
+arrange(Name, Condition) %>%
+unite(Condition_Exp, c(Condition, Exp), sep = '_') %>%
+mutate(Condition_Exp = factor(Condition_Exp, levels = unique(Condition_Exp))) %>%
+unite(Name_Iso, c(Name, Iso), sep = '_') %>%
+spread(Condition_Exp, Value)
+data9 <- MS_data %>%
+filter(ANOVA <= anova) %>%
+select(Name, Condition, grep('Exp|FC|Labeled', names(MS_data))) %>%
+gather(Exp, Value,-Name,-Condition) %>%
+arrange(Name, Condition) %>%
+group_by(Name) %>%
+mutate(Nr.NA = sum(is.na(Value)),
+Nr.Samples = n()) %>%
+filter(Nr.NA < Nr.Samples - 1) %>%
+ungroup() %>%
+select(-Nr.NA,-Nr.Samples) %>%
+unite(Condition_Exp, c(Condition, Exp), sep = '_') %>%
+mutate(Condition_Exp = factor(Condition_Exp, levels = unique(Condition_Exp))) %>%
+spread(Condition_Exp, Value)
+head(data9)
+MS_data %>%
+filter(ANOVA <= anova)
+head(MS_data)
+anova=1
+MS_data %>%
+filter(ANOVA <= anova)
+data9 <- MS_data %>%
+filter(ANOVA <= anova) %>%
+select(Name, Condition, grep('Exp|FC|Labeled', names(MS_data))) %>%
+gather(Exp, Value,-Name,-Condition) %>%
+arrange(Name, Condition) %>%
+group_by(Name) %>%
+mutate(Nr.NA = sum(is.na(Value)),
+Nr.Samples = n()) %>%
+filter(Nr.NA < Nr.Samples - 1) %>%
+ungroup() %>%
+select(-Nr.NA,-Nr.Samples) %>%
+unite(Condition_Exp, c(Condition, Exp), sep = '_') %>%
+mutate(Condition_Exp = factor(Condition_Exp, levels = unique(Condition_Exp))) %>%
+spread(Condition_Exp, Value)
+amounts3$ANOVA <= anova
+sum(amounts3$ANOVA <= anova)
+anova = 0.05
+sum(amounts3$ANOVA <= anova)
+anova = 1
+test <- make_matrix(amounts3, anova = 1)
+test
+head(test)
+make_pheatmap <- function(matrix, samples = info, heat.color = c('navy','grey90','firebrick3'),
+Norv, Title, folder = getwd()){
+# Find out what kind of input matrix is, ie relative amounts, MIDs etc
+type <- str_remove(colnames(matrix), '^(.)*_') %>%
+str_remove('( )?[0-9]+$') %>%
+unique()
+switch(type,
+Exp = ext <- 'Relative Amounts',
+MID = ext <- 'MIDs',
+FC = ext <- 'Fractional Contribution',
+Labeled = ext <- 'Percent Labeled'
+)
+# Make sure the folder has a "/" at the end
+if(!grepl('/$', folder)) folder <- paste0(folder, '/')
+#if (exists('samples')==F) samples <- info   # Important for heatmap annotation
+ann <- select(samples, Condition, Cell.Number) %>%
+as.data.frame()
+rownames(ann) <- colnames(matrix)
+ann_colors = list(    # This names list defines the colors for sample groups
+Condition = colors[1:length(unique(gsub('_(.)*','',colnames(matrix))))],
+Norvaline = c("white", "blue"),
+Cell.Number = c("white", "green")
+)
+if (exists('Norv')==T) {    # Show normalization value in each sample if set
+ann$Norvaline <- Norv     # This could become an anker for Shiny
+} else {
+ann_colors$Norvaline <- NULL  # Don't show norvaline trace
+}
+names(ann_colors[['Condition']]) <- unique(gsub('_(.)*','',colnames(matrix)))
+matrix[is.na(matrix)] <- 0
+heatmap.title = paste0(folder, Title, '_Heatmap_',ext,'.pdf', sep='')
+pheatmap::pheatmap(matrix, cluster_row = T, cluster_col = T,
+clustering_distance_rows = 'correlation',
+clustering_distance_cols = 'correlation',
+color = colorRampPalette(heat.color)(100),
+border_color = "black", scale = "row",
+cellwidth = 20, cellheight = 10,
+annotation = ann, annotation_colors = ann_colors,
+show_colnames = F, main = paste(Title,ext,sep = '-'),
+filename = heatmap.title)
+}
+make_heatmap(test)
+make_pheatmap(test)
+head(test)
+matrix <- test
+samples = info
+heat.color = c('navy','grey90','firebrick3')
+head(amounts)
+unique(amounts$Name)
+head(test)
+dim(test)
+ncol(test)
+make_pheatmap <- function(matrix, samples = info, heat.color = c('navy','grey90','firebrick3'),
+Norv = 1, Title, folder = getwd()){
+# Make normalizing metabolite = 1 if none is presented
+if(length(Norv) == 1) Norv = rep(1, ncol(matrix))
+# Find out what kind of input matrix is, ie relative amounts, MIDs etc
+type <- str_remove(colnames(matrix), '^(.)*_') %>%
+str_remove('( )?[0-9]+$') %>%
+unique()
+switch(type,
+Exp = ext <- 'Relative Amounts',
+MID = ext <- 'MIDs',
+FC = ext <- 'Fractional Contribution',
+Labeled = ext <- 'Percent Labeled'
+)
+# Make sure the folder has a "/" at the end
+if(!grepl('/$', folder)) folder <- paste0(folder, '/')
+#if (exists('samples')==F) samples <- info   # Important for heatmap annotation
+ann <- select(samples, Condition, Cell.Number) %>%
+as.data.frame()
+rownames(ann) <- colnames(matrix)
+ann_colors = list(    # This names list defines the colors for sample groups
+Condition = colors[1:length(unique(gsub('_(.)*','',colnames(matrix))))],
+Norvaline = c("white", "blue"),
+Cell.Number = c("white", "green")
+)
+if (exists('Norv')==T) {    # Show normalization value in each sample if set
+ann$Norvaline <- Norv     # This could become an anker for Shiny
+} else {
+ann_colors$Norvaline <- NULL  # Don't show norvaline trace
+}
+names(ann_colors[['Condition']]) <- unique(gsub('_(.)*','',colnames(matrix)))
+matrix[is.na(matrix)] <- 0
+heatmap.title = paste0(folder, Title, '_Heatmap_',ext,'.pdf', sep='')
+pheatmap::pheatmap(matrix, cluster_row = T, cluster_col = T,
+clustering_distance_rows = 'correlation',
+clustering_distance_cols = 'correlation',
+color = colorRampPalette(heat.color)(100),
+border_color = "black", scale = "row",
+cellwidth = 20, cellheight = 10,
+annotation = ann, annotation_colors = ann_colors,
+show_colnames = F, main = paste(Title,ext,sep = '-'),
+filename = heatmap.title)
+}
+make_pheatmap(test)
+Norv = 1
+# Make normalizing metabolite = 1 if none is presented
+if(length(Norv) == 1) Norv = rep(1, ncol(matrix))
+Norv
+# Find out what kind of input matrix is, ie relative amounts, MIDs etc
+type <- str_remove(colnames(matrix), '^(.)*_') %>%
+str_remove('( )?[0-9]+$') %>%
+unique()
+switch(type,
+Exp = ext <- 'Relative Amounts',
+MID = ext <- 'MIDs',
+FC = ext <- 'Fractional Contribution',
+Labeled = ext <- 'Percent Labeled'
+)
+#if (exists('samples')==F) samples <- info   # Important for heatmap annotation
+ann <- select(samples, Condition, Cell.Number) %>%
+as.data.frame()
+rownames(ann) <- colnames(matrix)
+ann
+colnames(matrix)
+class(ann)
+rownames(ann) <- colnames(matrix)
+make_pheatmap(test, samples = info[1:6,])
+colors
+library(ShinyMetab)
+make_pheatmap <- function(matrix, samples = info, heat.color = c('navy','grey90','firebrick3'),
+Norv = 1, Title, folder = getwd()){
+# Make normalizing metabolite = 1 if none is presented
+if(length(Norv) == 1) Norv = rep(1, ncol(matrix))
+# Find out what kind of input matrix is, ie relative amounts, MIDs etc
+type <- str_remove(colnames(matrix), '^(.)*_') %>%
+str_remove('( )?[0-9]+$') %>%
+unique()
+switch(type,
+Exp = ext <- 'Relative Amounts',
+MID = ext <- 'MIDs',
+FC = ext <- 'Fractional Contribution',
+Labeled = ext <- 'Percent Labeled'
+)
+# Make sure the folder has a "/" at the end
+if(!grepl('/$', folder)) folder <- paste0(folder, '/')
+#if (exists('samples')==F) samples <- info   # Important for heatmap annotation
+ann <- select(samples, Condition, Cell.Number) %>%
+as.data.frame()
+rownames(ann) <- colnames(matrix)
+ann_colors = list(    # This names list defines the colors for sample groups
+Condition = colors[1:length(unique(gsub('_(.)*','',colnames(matrix))))],
+Norvaline = c("white", "blue"),
+Cell.Number = c("white", "green")
+)
+if (exists('Norv')==T) {    # Show normalization value in each sample if set
+ann$Norvaline <- Norv     # This could become an anker for Shiny
+} else {
+ann_colors$Norvaline <- NULL  # Don't show norvaline trace
+}
+names(ann_colors[['Condition']]) <- unique(gsub('_(.)*','',colnames(matrix)))
+matrix[is.na(matrix)] <- 0
+heatmap.title = paste0(folder, Title, '_Heatmap_',ext,'.pdf', sep='')
+pheatmap::pheatmap(matrix, cluster_row = T, cluster_col = T,
+clustering_distance_rows = 'correlation',
+clustering_distance_cols = 'correlation',
+color = colorRampPalette(heat.color)(100),
+border_color = "black", scale = "row",
+cellwidth = 20, cellheight = 10,
+annotation = ann, annotation_colors = ann_colors,
+show_colnames = F, main = paste(Title,ext,sep = '-'),
+filename = heatmap.title)
+}
+make_pheatmap(test, samples = info[1:6,])
+samples <- info[1:6,]
+#if (exists('samples')==F) samples <- info   # Important for heatmap annotation
+ann <- select(samples, Condition, Cell.Number) %>%
+as.data.frame()
+rownames(ann) <- colnames(matrix)
+ann_colors = list(    # This names list defines the colors for sample groups
+Condition = colors[1:length(unique(gsub('_(.)*','',colnames(matrix))))],
+Norvaline = c("white", "blue"),
+Cell.Number = c("white", "green")
+)
+colnames(matrix)
+gsub('_(.)*','', colnames(matrix))
+unique(gsub('_(.)*','', colnames(matrix)))
+1:length(unique(gsub('_(.)*','', colnames(matrix))))
+colors[1:length(unique(gsub('_(.)*','', colnames(matrix))))]
+colors

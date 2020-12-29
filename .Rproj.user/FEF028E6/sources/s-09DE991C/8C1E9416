@@ -1,0 +1,24 @@
+{
+    "id": "8C1E9416",
+    "path": "C:/Users/Daniel/Dropbox/R_projects/ShinyMetab/R/data_Viewer_module.R",
+    "project_path": "R/data_Viewer_module.R",
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1609200080349.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "cursorPosition": "38,0",
+        "scrollLine": "9"
+    },
+    "folds": "12|44|34|0|\n",
+    "lastKnownWriteTime": 1609211087,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1609211087809,
+    "read_only": false,
+    "read_only_alternatives": []
+}
